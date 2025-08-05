@@ -76,10 +76,25 @@ def filter_stocks(filters: dict):
         "roe": f"gte.{filters.get('roe', 0)}",
         "debt_equity": f"lte.{filters.get('debt_equity', 1)}",
         "market_cap": f"lte.{filters.get('market_cap', 999999999)}",
-        "sector": f"ilike.%{filters.get('sector', '')}%"
+        "sector": f"ilike.%{filters.get('sector', '')}%",
     }
-    res = requests.get(f"{SUPABASE_URL}/rest/v1/nse500_stocks", headers=headers, params=params)
-    return res.json()
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/nse500_stocks",
+        headers=headers,
+        params=params
+    )
+
+    print("🔍 Supabase response status:", response.status_code)
+    print("📦 Supabase response text:", response.text)
+
+    try:
+        data = response.json()
+        if not isinstance(data, list):
+            raise ValueError("Expected list of stock records")
+        return data
+    except Exception as e:
+        raise RuntimeError(f"Failed to parse Supabase response: {e}")
 
 # === StockScorerAgent ===
 def score_stock(stock, filters):
