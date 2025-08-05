@@ -24,6 +24,10 @@ import json
 import re
 
 # === PromptParserAgent ===
+import json
+import re
+
+# === PromptParserAgent ===
 def parse_prompt(prompt: str) -> dict:
     response = co.chat(
         message=f"""
@@ -50,15 +54,16 @@ Only return a valid JSON object with this structure:
         temperature=0.3
     )
 
-    # Extract the JSON block from response text
-    match = re.search(r'\{.*\}', response.text.strip(), re.DOTALL)
+    # Extract JSON block safely using regex
+    match = re.search(r'\{[\s\S]*\}', response.text.strip())
     if not match:
-        raise ValueError("Could not extract JSON from Cohere response")
+        raise ValueError("No valid JSON block found in Cohere response.")
 
     try:
         return json.loads(match.group(0))
     except json.JSONDecodeError as e:
-        raise ValueError(f"Failed to parse JSON: {e}")
+        raise ValueError(f"Invalid JSON from Cohere: {e}")
+
 
 
 # === StockFilterAgent ===
