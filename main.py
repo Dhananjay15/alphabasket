@@ -20,14 +20,6 @@ class PromptInput(BaseModel):
     prompt: str
 
 # === PromptParserAgent ===
-import json
-import re
-
-# === PromptParserAgent ===
-import json
-import re
-
-# === PromptParserAgent ===
 def parse_prompt(prompt: str) -> dict:
     response = co.chat(
         message=f"""
@@ -85,16 +77,23 @@ def filter_stocks(filters: dict):
         params=params
     )
 
-    print("🔍 Supabase response status:", response.status_code)
-    print("📦 Supabase response text:", response.text)
-
+    print("🔍 Supabase status:", response.status_code)
+    
     try:
         data = response.json()
+        print("📦 Supabase returned:", data)
+
+        if isinstance(data, dict) and "message" in data:
+            raise ValueError(f"Supabase error: {data['message']}")
+
         if not isinstance(data, list):
             raise ValueError("Expected list of stock records")
+        
         return data
+
     except Exception as e:
         raise RuntimeError(f"Failed to parse Supabase response: {e}")
+
 
 # === StockScorerAgent ===
 def score_stock(stock, filters):
