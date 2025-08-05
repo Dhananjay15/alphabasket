@@ -1,3 +1,5 @@
+import json
+import re
 from fastapi import FastAPI
 from pydantic import BaseModel
 import requests
@@ -18,15 +20,21 @@ class PromptInput(BaseModel):
     prompt: str
 
 # === PromptParserAgent ===
+import json
+import re
+
+# === PromptParserAgent ===
 def parse_prompt(prompt: str) -> dict:
     response = co.chat(
         message=f"""
 You are a financial prompt parser. Your job is to extract the user's investment preferences from the prompt.
+
 Prompt: "{prompt}"
-Return this format:
+
+Only return a valid JSON object with this structure:
 {{
   "theme": "...",
-  "keywords": [...],
+  "keywords": ["...", "..."],
   "horizon": "...",
   "filters": {{
     "sector": "...",
@@ -37,10 +45,21 @@ Return this format:
     "market_cap": "...",
     "dividend_yield": "..."
   }}
-}}""",
+}}
+""",
         temperature=0.3
     )
-    return eval(response.text)
+
+    # Extract the JSON block from response text
+    match = re.search(r'\{.*\}', response.text.strip(), re.DOTALL)
+    if not match:
+        raise ValueError("Could not extract JSON from Cohere response")
+
+    try:
+        return json.loads(match.group(0))
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse JSON: {e}")
+
 
 # === StockFilterAgent ===
 def filter_stocks(filters: dict):
