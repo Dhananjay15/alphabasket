@@ -81,11 +81,12 @@ def filter_stocks(filters: dict):
     roe_op, roe_val = parse_numeric_filter(filters.get("roe"), 0)
     debt_op, debt_val = parse_numeric_filter(filters.get("debt_equity"), 1)
     mc_op, mc_val = parse_numeric_filter(filters.get("market_cap"), 1e12)
+    mc_val = int(mc_val)  # ✅ ensure BIGINT-compatible for Supabase
 
     params = {
-        f"roe": f"{roe_op}.{roe_val}",
-        f"debt_equity": f"{debt_op}.{debt_val}",
-        f"market_cap": f"{mc_op}.{mc_val}",
+        "roe": f"{roe_op}.{roe_val}",
+        "debt_equity": f"{debt_op}.{debt_val}",
+        "market_cap": f"{mc_op}.{mc_val}",  # now safe
     }
 
     sector = filters.get("sector")
@@ -104,6 +105,7 @@ def filter_stocks(filters: dict):
         return data
     except Exception as e:
         raise RuntimeError(f"Failed to parse Supabase response: {e}")
+
 
 # === StockScorerAgent ===
 def score_stock(stock, filters):
