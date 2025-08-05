@@ -21,11 +21,22 @@ class PromptInput(BaseModel):
 def parse_numeric_filter(expr: str, default_value: float, default_op: str = "gte") -> tuple[str, float]:
     if not isinstance(expr, str):
         return default_op, default_value
+
     match = re.match(r'([<>]=?|=)?\s*([0-9.]+)', expr.strip())
     if match:
-        op = match.group(1) or default_op
+        raw_op = match.group(1) or default_op
         value = float(match.group(2))
+
+        op_map = {
+            '>': 'gt',
+            '>=': 'gte',
+            '<': 'lt',
+            '<=': 'lte',
+            '=': 'eq',
+        }
+        op = op_map.get(raw_op, default_op)
         return op, value
+
     return default_op, default_value
 
 # === PromptParserAgent ===
