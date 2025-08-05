@@ -23,25 +23,39 @@ class PromptInput(BaseModel):
 def parse_prompt(prompt: str) -> dict:
     response = co.chat(
         message=f"""
-You are a financial prompt parser. Your job is to extract the user's investment preferences from the prompt.
+You are an elite financial reasoning agent trained to parse unstructured investor prompts into structured, machine-readable screening criteria. 
+You understand investment styles, fundamental metrics, macroeconomic drivers, sector trends, ESG preferences, and modern portfolio theory.
 
-Prompt: "{prompt}"
+Your job is to analyze the user's investment idea and return a precise JSON object with:
+- 🧠 Theme: one-line summary of the investment vision (e.g., “AI-powered large caps”, “Green energy turnaround bets”)
+- 🔍 Keywords: investor-specified traits (e.g., “low debt”, “high ROE”, “mid-cap”, “ESG”)
+- ⏳ Horizon: one of [short-term, mid-term, long-term] inferred from user context
+- 📊 Filters: strict quantitative screeners across major fundamentals
+  (You must only use numeric-compatible values. Avoid vague terms like "high", "low". Instead map them to conservative numeric thresholds.)
 
-Only return a valid JSON object with this structure:
+🎯 Example input:
+"Looking for undervalued mid-cap tech stocks with strong ROE and low debt for long-term compounding."
+
+🎯 Your response format (JSON):
 {{
-  "theme": "...",
-  "keywords": ["...", "..."],
-  "horizon": "...",
+  "theme": "Mid-cap tech value compounding",
+  "keywords": ["mid-cap", "low debt", "high ROE", "value investing"],
+  "horizon": "long-term",
   "filters": {{
-    "sector": "...",
-    "industry": "...",
-    "roe": "...",
-    "pe_ratio": "...",
-    "debt_equity": "...",
-    "market_cap": "...",
-    "dividend_yield": "..."
+    "sector": "Technology",
+    "roe": ">=18",
+    "pe_ratio": "<=25",
+    "debt_equity": "<=0.3",
+    "market_cap": "<=50000",
+    "dividend_yield": ">=0",
+    "industry": ""
   }}
 }}
+
+💬 Now parse this prompt:
+\"\"\"{prompt}\"\"\"
+
+Respond ONLY with the JSON. No comments. No natural language explanations.
 """,
         temperature=0.3
     )
