@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: alphabasket-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: COHERE_API_KEY
+        value: hPoEHqV0TjLRUZohWxFRxDZZlte0Gsrii5vId0k6
+      - key: SUPABASE_SERVICE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4d2JhbnlxcGZod3duZ3FpbmZyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDM5MDk3NCwiZXhwIjoyMDY5OTY2OTc0fQ.H89oPlMugew2bPwE6KeEChj6sJ-OYiEFjzfsf-wkpcM
