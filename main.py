@@ -109,17 +109,42 @@ def build_basket(stocks, top_n=10):
 # === API Endpoint ===
 @app.post("/generate_basket")
 async def generate_basket(input: PromptInput):
-    parsed = parse_prompt(input.prompt)
-    filtered = filter_stocks(parsed['filters'])
+    # Step 1: Parse prompt
+    try:
+        parsed = parse_prompt(input.prompt)
+    except Exception as e:
+        return {"error": f"PromptParserAgent failed: {str(e)}"}
 
+    # Step 2: Filter stocks from Supabase
+    try:
+        filtered = filter_stocks(parsed['filters'])
+        if not isinstance(filtered, list):
+            raise ValueError("Expected a list of stocks but got something else.")
+    except Exception as e:
+        return {"error": f"StockFilterAgent failed: {str(e)}"}
+
+    # Step 3: Score + explain each stock
     enriched = []
     for s in filtered:
-        s['score'] = score_stock(s, parsed['filters'])
-        s['reason'] = generate_reasoning(s, input.prompt)
-        enriched.append(s)
+        if not isinstance(s, dict):
+            print(f"⚠️ Skipping unexpected non-dict stock: {s}")
+            continue
 
-    top_stocks = build_basket(enriched)
+        try:
+            s['score'] = score_stock(s, parsed['filters'])
+            s['reason'] = generate_reasoning(s, input.prompt)
+            enriched.append(s)
+        except Exception as e:
+            print(f"⚠️ Failed to score or explain stock {s.get('symbol', '?')}: {e}")
+            continue
 
+    # Step 4: Build final basket
+    try:
+        top_stocks = build_basket(enriched)
+    except Exception as e:
+        return {"error": f"BasketBuilderAgent failed: {str(e)}"}
+
+    # Return full response
     return {
         "basket": top_stocks,
         "summary": {
@@ -128,6 +153,7 @@ async def generate_basket(input: PromptInput):
             "filters": parsed.get("filters")
         }
     }
+
 
 # Optional: healthcheck endpoint
 @app.get("/health")
