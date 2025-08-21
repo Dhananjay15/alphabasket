@@ -6,7 +6,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-
+from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import cohere
 from fastapi import FastAPI, HTTPException
@@ -52,7 +52,13 @@ logger = logging.getLogger("basket_gen")
 
 # ---------- FASTAPI ----------
 app = FastAPI(title="AlphaBasket Basket Generator")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 🔥 you can restrict later to your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],   # allow POST, GET, OPTIONS etc.
+    allow_headers=["*"],   # allow all headers
+)
 # ---------- Cohere Client (blocking) ----------
 co = cohere.Client(COHERE_API_KEY)
 
