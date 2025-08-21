@@ -2,3 +2,9 @@ fastapi
 uvicorn
 requests
 cohere
+fastapi
+uvicorn[standard]
+httpx
+pydantic
+cohere
+python-dotenv
