@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AlphaBasket.AI — Basket Dashboard</title>
+
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg-a:#0a0f1a; --bg-b:#0b1725;
+      --glass: rgba(255,255,255,0.04);
+      --muted: #b9ccd6;
+      --accent-1:#00e6c3; --accent-2:#00aaff;
+      --card-radius:16px;
+      --text-main: #e6fbff;
+      --soft: rgba(255,255,255,0.06);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;color:var(--muted);background:linear-gradient(160deg,var(--bg-a),var(--bg-b));-webkit-font-smoothing:antialiased}
+    body::before{content:"";position:fixed;inset:0;background:radial-gradient(800px 400px at 12% 12%, rgba(0,230,195,0.03), transparent 12%), radial-gradient(700px 350px at 88% 88%, rgba(0,170,255,0.02), transparent 12%);pointer-events:none}
+
+    .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px}
+    .container{width:100%;max-width:1200px;margin:0 auto}
+
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px;justify-content:space-between}
+    .logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+    .logo img{height:40px;width:auto}
+    .brand{font-weight:800;font-size:18px;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .header-actions{display:flex;gap:8px;align-items:center}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--card-radius);padding:18px;border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(2,12,23,0.6);color:var(--text-main)}
+
+    .top-summary{display:grid;grid-template-columns: 1fr 340px;gap:18px;margin-bottom:18px}
+    @media (max-width:980px){ .top-summary{grid-template-columns:1fr} }
+
+    .summary-main { display:flex;flex-direction:column;gap:10px }
+    .title { display:flex;align-items:center;gap:12px }
+    .title h1{margin:0;font-size:20px}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:2px}
+
+    .kpi-row{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}
+    .kpi { background:var(--soft); padding:12px; border-radius:12px; min-width:110px; text-align:center; border:1px solid rgba(255,255,255,0.04) }
+    .kpi .num{font-weight:800;color:#fff;font-size:1.05rem}
+    .kpi .label{font-size:12px;color:var(--muted)}
+
+    .charts-row{display:grid;grid-template-columns: 1fr 1fr 1fr; gap:12px; margin-bottom:18px}
+    @media (max-width:1100px){ .charts-row{grid-template-columns:1fr 1fr} }
+    @media (max-width:720px){ .charts-row{grid-template-columns:1fr} }
+
+    .chart-card{padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+    .chart-title{font-size:14px;margin:0 0 8px;color:var(--text-main)}
+
+    .stocks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:12px}
+    @media (max-width:560px){ .stocks-grid{grid-template-columns:1fr} }
+
+    .stock-card{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);transition:transform .18s}
+    .stock-card:hover{transform:translateY(-6px)}
+    .stock-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    .stock-left{min-width:0}
+    .stock-name{font-weight:700;color:#fff}
+    .stock-symbol{font-size:13px;color:var(--muted)}
+    .stock-meta{font-size:13px;color:var(--muted);margin-top:4px}
+
+    .score-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+    .score-pill{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-weight:700;color:#fff;font-size:13px}
+    .score-bar{height:8px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden;flex:1}
+    .score-fill{height:100%;background:linear-gradient(90deg,var(--accent-2),var(--accent-1));}
+
+    .spark{width:100%;height:48px}
+
+    .stock-reason{font-size:13px;color:#e8ffff;opacity:0.95;margin-top:6px}
+
+    details{margin-top:8px;color:var(--muted);font-size:13px}
+    pre{background:rgba(0,0,0,0.15);padding:8px;border-radius:8px;overflow:auto;color:#dff6f6;font-size:13px}
+
+    .side {display:flex;flex-direction:column;gap:12px}
+    .side .card{padding:12px}
+    .side .muted{color:var(--muted)}
+
+    .controls{display:flex;flex-direction:column;gap:8px}
+    .btn{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent-2),var(--accent-1));color:#001018}
+
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .center{display:flex;align-items:center;justify-content:center}
+
+    .gradient-text {
+      background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="container">
+
+      <header>
+        <div class="logo"><a href="index.html"><img src="logo3.png" alt="logo"></a><span class="brand">AlphaBasket.AI</span></div>
+        <div class="header-actions">
+          <button id="backBtn" class="btn ghost">← Back</button>
+          <button id="saveBtn" class="btn primary">💾 Save</button>
+        </div>
+      </header>
+
+      <div class="top-summary">
+        <div class="card summary-main">
+          <div class="title">
+            <div>
+              <h1 id="basketTitle">Premium Basket</h1>
+              <div class="subtitle" id="basketSub">Explainable AI · Balanced tilts · Simple Info</div>
+            </div>
+          </div>
+
+          <div id="summaryArea" class="small muted">Loading summary…</div>
+          <div class="kpi-row" id="kpisRow" aria-hidden="false"></div>
+        </div>
+
+        <aside class="card side">
+          <div>
+            <h3 style="margin-top:0">Quick Insights</h3>
+            <div id="quickInsights" class="muted small">Loading insights…</div>
+          </div>
+          <div style="margin-top:8px" class="controls">
+            <button id="toggleCompact" class="btn ghost">Toggle Compact</button>
+            <button id="exportCsv" class="btn ghost">📥 Export CSV</button>
+            <button id="downloadReport" class="btn ghost">📄 Export Report</button>
+          </div>
+        </aside>
+      </div>
+
+      <div class="charts-row">
+        <div class="card chart-card">
+          <div class="chart-title">Sector Allocation</div>
+          <canvas id="sectorChart" height="220"></canvas>
+        </div>
+
+        <div class="card chart-card">
+          <div class="chart-title">Allocation (by weight)</div>
+          <canvas id="allocChart" height="220"></canvas>
+        </div>
+
+        <div class="card chart-card">
+          <div class="chart-title">Score Distribution</div>
+          <canvas id="scoreChart" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3 style="margin-top:0">Basket Composition</h3>
+        <div id="stocksContainer" class="stocks-grid"></div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+(function(){
+  const basketTitle = document.getElementById('basketTitle');
+  const basketSub = document.getElementById('basketSub');
+  const summaryArea = document.getElementById('summaryArea');
+  const kpisRow = document.getElementById('kpisRow');
+  const quickInsights = document.getElementById('quickInsights');
+  const stocksContainer = document.getElementById('stocksContainer');
+  const backBtn = document.getElementById('backBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const toggleCompact = document.getElementById('toggleCompact');
+  const exportCsv = document.getElementById('exportCsv');
+  const downloadReport = document.getElementById('downloadReport');
+  const sectorCanvas = document.getElementById('sectorChart').getContext('2d');
+  const allocCanvas = document.getElementById('allocChart').getContext('2d');
+  const scoreCanvas = document.getElementById('scoreChart').getContext('2d');
+  let sectorChart, allocChart, scoreChart, compact=false;
+
+  const raw = localStorage.getItem('basketResult');
+  if(!raw){
+    summaryArea.textContent = '⚠️ No basket found. Generate one first.';
+    stocksContainer.innerHTML = '<div class="muted">No data</div>';
+    saveBtn.style.display = 'none'; exportCsv.style.display='none'; toggleCompact.style.display='none'; downloadReport.style.display='none';
+    quickInsights.textContent='No data';
+    return;
+  }
+
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch(e) { parsed=null; }
+  const basket = (parsed && (parsed.basket || parsed.stocks)) || [];
+  const summary = (parsed && parsed.summary) || {};
+
+  basketTitle.textContent = summary.theme || 'AI Generated Basket';
+  basketSub.textContent = summary.horizon ? `Horizon: ${summary.horizon}` : 'Generated by AlphaBasket.AI';
+
+  renderSummary(summary);
+  renderKPIs(basket, summary);
+  renderQuickInsights(basket, summary);
+  renderCharts(basket);
+  renderStocks(basket);
+
+  backBtn.addEventListener('click', ()=> location.href='page2.html');
+  saveBtn.addEventListener('click', ()=> alert('✅ Save to account — placeholder'));
+  toggleCompact.addEventListener('click',()=>{ compact=!compact; renderStocks(basket); toggleCompact.textContent = compact?'Show Detailed':'Show Compact'; });
+  exportCsv.addEventListener('click',()=>exportCSV(basket));
+  downloadReport.addEventListener('click',()=>alert('📄 Export report — placeholder'));
+
+  function renderSummary(s){
+    if(!s){ summaryArea.textContent='No summary'; return;}
+    summaryArea.innerHTML = `<div><strong class="gradient-text">${escapeHtml(s.theme||'-')}</strong></div>
+      <div class="muted small">Horizon: ${escapeHtml(s.horizon||'-')}</div>`;
+  }
+
+  function renderKPIs(basket,s){
+    kpisRow.innerHTML='';
+    const total = basket.length;
+    const avgRoe = s && s.average_roe!==undefined ? s.average_roe:'-';
+    const avgPe = s && s.average_pe!==undefined ? s.average_pe:'-';
+    const items=[
+      {label:'Stocks',num:total},
+      {label:'Avg ROE',num:avgRoe!=='-'?`${avgRoe}%`:'-'},
+      {label:'Avg PE',num:avgPe!=='-'?avgPe:'-'}
+    ];
+    items.forEach(it=>{
+      const el=document.createElement('div');
+      el.className='kpi';
+      el.innerHTML=`<div class="num">${escapeHtml(String(it.num))}</div><div class="label">${escapeHtml(it.label)}</div>`;
+      kpisRow.appendChild(el);
+    });
+  }
+
+  function renderQuickInsights(basket,s){
+    if(!basket||basket.length===0){ quickInsights.textContent='No insights'; return; }
+    const top = [...basket].sort((a,b)=> (b.score||0)-(a.score||0))[0];
+    const top2 = [...basket].sort((a,b)=> (b.score||0)-(a.score||0)).slice(0,3).map(x=>x.symbol).join(', ');
+    const avgPe = avg(basket.map(x=>Number(x.pe_ratio||0)))||0;
+    const sectors = [...new Set(basket.map(x=>x.sector))].length;
+    quickInsights.innerHTML = `Top stock: <strong>${escapeHtml((top&&top.symbol)||'—')}</strong><br/>
+      Top picks: <strong>${escapeHtml(top2||'—')}</strong><br/>
+      Avg PE: <strong>${Number(avgPe).toFixed(1)}</strong><br/>
+      Sectors covered: <strong>${sectors}</strong>`;
+  }
+
+  function renderCharts(basket){
+    const allocBySector={}; const allocations=[]; const labels=[];
+    let providedAllocSum=0;
+    basket.forEach(it=>{ const alloc=it.allocation??it.weight??0; providedAllocSum+=alloc; });
+    basket.forEach(it=>{
+      const alloc=it.allocation??it.weight??Math.round(it.score||100/basket.length);
+      allocations.push(alloc); labels.push(it.symbol||it.name); allocBySector[it.sector||'Other']=(allocBySector[it.sector||'Other']||0)+alloc;
+    });
+
+    if(sectorChart) sectorChart.destroy();
+    sectorChart = new Chart(sectorCanvas,{type:'doughnut',data:{labels:Object.keys(allocBySector),datasets:[{data:Object.values(allocBySector),backgroundColor:palette(Object.keys(allocBySector).length)}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#cfeef3'}}},cutout:'50%'}});
+
+    if(allocChart) allocChart.destroy();
+    allocChart = new Chart(allocCanvas,{type:'doughnut',data:{labels:labels,datasets:[{data:allocations,backgroundColor:palette(labels.length)}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#cfeef3',boxWidth:10}}},cutout:'60%'}});
+
+    if(scoreChart) scoreChart.destroy();
+    scoreChart = new Chart(scoreCanvas,{type:'bar',data:{labels:labels,datasets:[{data:basket.map(it=>it.score||0),backgroundColor:'#4facfe',borderRadius:6} ]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#cfeef3'}},y:{min:0,max:100,ticks:{color:'#cfeef3'}}}}});
+  }
+
+  function renderStocks(basket){
+    stocksContainer.innerHTML='';
+    if(!basket||basket.length===0){ stocksContainer.innerHTML='<div class="muted">No stocks</div>'; return; }
+    basket.forEach((it,idx)=>{
+      const card=document.createElement('div'); card.className='stock-card';
+      const scoreVal=Number(it.score||0); const allocation=it.allocation??it.weight??Math.round(scoreVal||100/basket.length);
+      card.innerHTML=`<div class="stock-head">
+        <div class="stock-left">
+          <div class="stock-name">${escapeHtml(it.name||it.symbol)}</div>
+          <div class="stock-symbol">${escapeHtml(it.symbol||'')} · <span class="muted">${escapeHtml(it.sector||'Other')}</span></div>
+        </div>
+        <div class="score-pill">${allocation}%</div>
+      </div>
+      <div class="score-row">
+        <div class="score-bar"><div class="score-fill" style="width:${scoreVal}%;"></div></div>
+        <div class="muted small">${scoreVal} pts</div>
+      </div>
+      ${!compact?`<div class="stock-meta small">PE: ${it.pe_ratio||'-'} · ROE: ${it.roe||'-'} · Risk: ${it.risk||'-'}</div>
+      <div class="stock-reason">${it.reason||'-'}</div>`:''}`;
+      stocksContainer.appendChild(card);
+    });
+  }
+
+  function exportCSV(basket){
+    if(!basket||basket.length===0){ alert('No data'); return;}
+    let csv='Name,Symbol,Sector,Score,Allocation,PE,ROE,Risk,Reason\n';
+    basket.forEach(it=>{
+      csv+=`${it.name||''},${it.symbol||''},${it.sector||''},${it.score||''},${it.allocation||''},${it.pe_ratio||''},${it.roe||''},${it.risk||''},"${it.reason||''}"\n`;
+    });
+    const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='basket.csv'; a.click(); URL.revokeObjectURL(url);
+  }
+
+  function avg(arr){ return arr.length===0?0:arr.reduce((a,b)=>a+b,0)/arr.length; }
+  function escapeHtml(s){ return s?String(s).replace(/[&<>"']/g,tag=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[tag])):''; }
+
+  function palette(n){
+    const base=['#00e6c3','#00aaff','#f78ef2','#ffcc00','#ff6a6a','#9c88ff','#6ab04c','#ff7979','#badc58','#f9ca24'];
+    const arr=[]; for(let i=0;i<n;i++) arr.push(base[i%base.length]); return arr;
+  }
+})();
+</script>
+</body>
+</html>

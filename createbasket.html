@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AlphaBasket.AI – Build My Basket</title>
+
+  <!-- Fonts & CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="page2.css" />
+  <link rel="icon" href="favicon.ico" />
+  <meta name="theme-color" content="#0a0f1a">
+  <meta name="description" content="Generate your custom AI-powered stock basket.">
+</head>
+<body>
+  <!-- Top Navigation -->
+  <header class="glass-header">
+    <div class="navbar-content">
+      <a href="index.html" class="logo-link">
+        <img src="logo3.png" alt="AlphaBasket.AI logo" class="logo" />
+        <span class="brand-text">AlphaBasket.AI</span>
+      </a>
+      <a href="index.html" class="nav-text-link">Home</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <section class="instruction-banner">
+    <div class="instruction-icon">
+      <img src="logo3.png" alt="AlphaBasket.AI Logo" class="instruction-logo" />
+    </div>
+    <div class="instruction-text">
+      <h2>Craft a Smart Investment Strategy</h2>
+      <p>Share your investment theme and time horizon, and let our AI build a custom stock basket — optimized for your goals, backed by data, and fully explainable.</p>
+    </div>
+  </section>
+
+  <!-- Input Form Card -->
+  <section class="glass-card form-card">
+    <h3>📝 Define Your Investment Vision</h3>
+
+    <textarea
+      id="userPrompt"
+      rows="5"
+      placeholder="e.g., Emerging market AI companies with strong balance sheets and ESG focus..."
+      aria-label="Enter your investment idea"
+    ></textarea>
+
+    <!-- Investment Horizon Buttons -->
+    <fieldset class="basket-options" aria-label="Choose investment horizon">
+      <legend style="display:none;">Investment Horizon</legend>
+
+      <label class="radio-card">
+        <input type="radio" name="horizon" value="short">
+        <span class="radio-content">
+          <strong>Short-Term</strong>
+        </span>
+      </label>
+
+      <label class="radio-card">
+        <input type="radio" name="horizon" value="mid">
+        <span class="radio-content">
+          <strong>Mid-Term</strong>
+        </span>
+      </label>
+
+      <label class="radio-card">
+        <input type="radio" name="horizon" value="long" checked>
+        <span class="radio-content">
+          <strong>Long-Term</strong>
+        </span>
+      </label>
+    </fieldset>
+
+    <button id="generateBasket" class="glass-btn">
+      🚀 Generate My Basket
+    </button>
+  </section>
+
+  <script src="page2.js"></script>
+</body>
+</html>
